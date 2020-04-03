@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Monster Slayer</title>
+    <script src="https://npmcdn.com/vue/dist/vue.js"></script>
+    <link rel="stylesheet" href="css/foundation.min.css">
+    <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div id="app">
+    <section class="row">
+        <div class="small-6 columns">
+            <h1 class="text-center">YOU</h1>
+            <div class="healthbar">
+                <div class="healthbar text-center"
+                     style="background-color: green; margin: 0; color: white;"
+                     :style="{width: playersLife + '%'}">
+                    {{playersLife}}
+                </div>
+            </div>
+        </div>
+        <div class="small-6 columns">
+            <h1 class="text-center">MONSTER</h1>
+            <div class="healthbar">
+                <div class="healthbar text-center"
+                     style="background-color: green; margin: 0; color: white;"
+                     :style="{width: playersLife + '%'}"
+                >
+                    {{monsterLife}}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section v-if="!inGame" class="row controls">
+        <div class="small-12 columns">
+            <button id="start-game" @click="startNew()">START NEW GAME</button>
+        </div>
+    </section>
+
+    <section v-if="inGame" class="row controls">
+        <div class="small-12 columns">
+            <button id="attack" @click="attack()">ATTACK</button>
+            <button id="special-attack" @click="specialAttack()">SPECIAL ATTACK</button>
+            <button id="heal" @click="heal()">HEAL</button>
+            <button id="give-up" @click="giveUp()">GIVE UP</button>
+        </div>
+    </section>
+    <section class="row log" v-if="turns.length > 0">
+        <div class="small-12 columns">
+            <ul>
+                <li v-for="turn in turns"
+                    :class="{'player-turn': turn.isHuman, 'monster-turn': !turn.isHuman}"
+                >
+                    {{turn.text}}
+                </li>
+            </ul>
+        </div>
+    </section>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            playersLife: 100,
+            monsterLife: 100,
+            turno: 'jugador',
+            inGame: false,
+            turns: []
+
+        },
+        methods: {
+            startNew() {
+                this.inGame = true;
+                this.playersLife = 100;
+                this.monsterLife = 100;
+            },
+            attack() {
+                var damage = Math.floor(this.getRandomArbitrary(1, 10));
+                this.monsterLife = this.monsterLife - damage;
+
+                this.turns.unshift({
+                    isHuman: true,
+                    text: 'player hits the monster for ' + damage
+
+                });
+
+                var damage = Math.floor(this.getRandomArbitrary(1, 10));
+                this.playersLife = this.playersLife - damage;
+                this.turns.unshift({
+                    isHuman: false,
+                    text: 'mosnter hits player for ' + damage
+
+                });
+
+                this.comprobarFinDeJuego()
+            },
+
+            specialAttack() {
+                var damage = Math.floor(this.getRandomArbitrary(1, 20));
+                this.monsterLife = this.monsterLife - damage;
+
+                this.turns.unshift({
+                    isHuman: true,
+                    text: 'player hits the monster with special attack for ' + damage
+
+                });
+
+                var damage = Math.floor(this.getRandomArbitrary(1, 20));
+                this.playersLife = this.playersLife - damage;
+                this.turns.unshift({
+                    isHuman: false,
+                    text: 'monster hits player with special attack for ' + damage
+
+                });
+
+                this.comprobarFinDeJuego()
+            },
+            heal() {
+                var heal = Math.floor(this.getRandomArbitrary(1, 10));
+                this.playersLife = this.playersLife + heal;
+
+                this.turns.unshift({
+                    isHuman: true,
+                    text: 'human heals for ' + heal
+
+                });
+
+                var damage = Math.floor(this.getRandomArbitrary(1, 10));
+                this.playersLife = this.playersLife - damage;
+
+                this.turns.unshift({
+                    isHuman: false,
+                    text: 'monster hits player for ' + damage
+
+                });
+
+            },
+            giveUp() {
+                this.inGame = false;
+                alert("te has rendido");
+            },
+            getRandomArbitrary(min, max) {
+                return Math.random() * (max - min) + min;
+            },
+            comprobarFinDeJuego() {
+                if (this.playersLife <= 0) {
+                    this.playersLife = 0;
+                    alert("has perdido!");
+                    this.turns = [];
+                    this.inGame = false;
+                } else if (this.monsterLife <= 0) {
+                    this.monsterLife = 0;
+                    alert("has ganado");
+                    this.inGame = false;
+                    this.turns = [];
+                }
+            }
+        }
+    })
+    ;
+</script>
+
+</body>
+</html>
